@@ -1,123 +1,160 @@
-# 🍕 Restaurant Backend API
+# Pizza Restaurant API - README
 
-This is a FastAPI-based backend for a pizza ordering system. The API allows users to view the menu, place orders, and retrieve order details.
+## Overview
+This is the backend API for a pizza restaurant, built using FastAPI and MySQL. It allows users to view the menu, place orders, and fetch orders using a mobile number. The admin panel can be used to add new menu items.
 
-## 🚀 Setup & Run
+## Tech Stack
+- **Backend**: FastAPI (Python)
+- **Database**: MySQL
+- **ORM**: SQLAlchemy
 
-### 1️⃣ Install Dependencies
-```sh
-pip install -r requirements.txt
-```
+---
 
-### 2️⃣ Start the Server
-```sh
-uvicorn app.main:app --reload
-```
+1. API documentation is available at:
+   - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+   - Redoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-### 3️⃣ API Documentation
-- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **Redoc UI**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+---
 
-## 📂 API Endpoints & Sample Requests
+## API Endpoints
 
-### 1️⃣ Get Menu Items
+### 1. Get Menu Items
 **Endpoint:** `GET /api/menu`
-#### 🔹 Sample Response
+
+**Description:** Retrieves all menu items.
+
+**Response:**
 ```json
 [
-    {"id": 1, "name": "Margherita", "price": 8.99},
-    {"id": 2, "name": "Pepperoni", "price": 10.99}
+    {
+        "id": 1,
+        "name": "Margherita",
+        "price": 9.99,
+        "category": "Vegetarian",
+        "description": "Classic Margherita pizza with fresh basil",
+        "image_url": "http://example.com/margherita.jpg"
+    }
 ]
 ```
 
 ---
-### 2️⃣ Add a Menu Item
+
+### 2. Add Menu Item (Admin Only)
 **Endpoint:** `POST /api/menu`
+
+**Description:** Adds a new menu item.
+
 **Request Body:**
 ```json
 {
     "name": "BBQ Chicken",
-    "price": 12.99
+    "price": 12.99,
+    "category": "Non-Vegetarian",
+    "description": "BBQ Chicken pizza with onions and cheese",
+    "image_url": "http://example.com/bbqchicken.jpg"
 }
 ```
-#### 🔹 Sample Response
+
+**Response:**
 ```json
 {
-    "id": 3,
-    "name": "BBQ Chicken",
-    "price": 12.99
+    "message": "Menu item added successfully!",
+    "item_id": 2
+}
+```
+
+**Error Handling:**
+- If `category` is missing, returns:
+```json
+{
+    "detail": "Category cannot be null"
 }
 ```
 
 ---
-### 3️⃣ Place an Order
-**Endpoint:** `POST /api/order`
+
+### 3. Place an Order
+**Endpoint:** `POST /api/orders`
+
+**Description:** Places a new order.
+
 **Request Body:**
 ```json
 {
     "customer_name": "John Doe",
-    "mobile": "1234567890",
+    "mobile": "9876543210",
     "items": [
         {"pizza_id": 1, "quantity": 2},
         {"pizza_id": 2, "quantity": 1}
-    ],
-    "total_price": 28.97
+    ]
 }
 ```
-#### 🔹 Sample Response
+
+**Response:**
 ```json
 {
-    "id": 101,
-    "customer_name": "John Doe",
-    "mobile": "1234567890",
-    "status": "Pending"
+    "order_id": 5,
+    "message": "Order placed successfully!"
 }
 ```
 
 ---
-### 4️⃣ Get Orders by Mobile Number
-**Endpoint:** `GET /api/orders?number=1234567890`
-#### 🔹 Sample Response
+
+### 4. Get Orders by Mobile Number
+**Endpoint:** `GET /api/orders?number=9876543210`
+
+**Description:** Fetches all orders associated with a given mobile number.
+
+**Response:**
 ```json
 [
-    {"id": 101, "customer_name": "John Doe", "mobile": "1234567890", "status": "Pending"}
+    {
+        "order_id": 5,
+        "customer_name": "John Doe",
+        "mobile": "9876543210",
+        "items": [
+            {"pizza_name": "Margherita", "quantity": 2},
+            {"pizza_name": "BBQ Chicken", "quantity": 1}
+        ],
+        "total_price": 32.97,
+        "status": "Preparing"
+    }
 ]
 ```
 
 ---
-### 5️⃣ Update Order Status
-**Endpoint:** `PUT /api/order/{id}`
-**Request Body:**
-```json
-{
-    "status": "Completed"
-}
-```
-#### 🔹 Sample Response
-```json
-{
-    "message": "Order status updated"
-}
-```
+
+## Database Schema
+### Menu Table
+| Column      | Type         | Constraints  |
+|------------|-------------|-------------|
+| id         | INT         | PRIMARY KEY |
+| name       | VARCHAR(100) | NOT NULL    |
+| price      | DECIMAL(10,2) | NOT NULL    |
+| category   | VARCHAR(50)  | NOT NULL    |
+| description | TEXT        | NULLABLE    |
+| image_url  | TEXT        | NULLABLE    |
+
+### Orders Table
+| Column        | Type         | Constraints  |
+|--------------|-------------|-------------|
+| id           | INT         | PRIMARY KEY |
+| customer_name | VARCHAR(100) | NOT NULL   |
+| mobile       | VARCHAR(15)  | NOT NULL   |
+| total_price  | DECIMAL(10,2) | NOT NULL   |
+| status       | VARCHAR(50)  | DEFAULT 'Preparing' |
 
 ---
-### 6️⃣ Cancel an Order
-**Endpoint:** `POST /api/order/cancel/{id}`
-#### 🔹 Sample Response
-```json
-{
-    "message": "Order cancelled successfully"
-}
-```
 
-## 🛠️ Technologies Used
-- **FastAPI** (Python Web Framework)
-- **MySQL** (Database)
-- **SQLAlchemy** (ORM for database operations)
-- **Uvicorn** (ASGI Server)
+## Notes
+- The API does **not** require authentication.
+- Orders can contain multiple pizzas.
+- Menu items cannot be added without a category.
+- Orders are fetched using `?number=` query parameter.
 
-## 🎯 Future Improvements
-- Add payment integration
-- Implement WebSockets for real-time order updates
+---
 
-🚀 **Enjoy your pizza! 🍕**
+## Future Enhancements
+- Implement authentication for the admin panel.
+- Add payment gateway integration.
+- Improve order tracking and status updates.

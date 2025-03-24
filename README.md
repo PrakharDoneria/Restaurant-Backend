@@ -1,160 +1,223 @@
-# Pizza Restaurant API - README
+# Pizza Restaurant API
 
-## Overview
-This is the backend API for a pizza restaurant, built using FastAPI and MySQL. It allows users to view the menu, place orders, and fetch orders using a mobile number. The admin panel can be used to add new menu items.
+Welcome to the Pizza Restaurant API! This backend is built with FastAPI, MongoDB, and Cloudinary to manage a pizza restaurant's operations, including handling pizzas, categories, orders, and image uploads.
 
-## Tech Stack
-- **Backend**: FastAPI (Python)
-- **Database**: MySQL
-- **ORM**: SQLAlchemy
+## Table of Contents
+1. [Getting Started](#getting-started)
+2. [API Endpoints](#api-endpoints)
+    - [Admin Endpoints](#admin-endpoints)
+    - [User Endpoints](#user-endpoints)
+    - [Image Upload Endpoint](#image-upload-endpoint)
+3. [Sample Responses](#sample-responses)
 
 ---
 
-1. API documentation is available at:
-   - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-   - Redoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/pizza-api.git
+   cd pizza-api
+   ```
+
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Create a `.env` file with the following environment variables:
+   ```
+   MONGO_URI=mongodb+srv://your-connection-string
+   DB_NAME=pizzaDB
+   CLOUDINARY_CLOUD_NAME=your-cloud-name
+   CLOUDINARY_API_KEY=your-api-key
+   CLOUDINARY_API_SECRET=your-api-secret
+   ```
+
+4. Run the application:
+   ```bash
+   python main.py
+   ```
+
+5. Visit the interactive API docs at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ---
 
 ## API Endpoints
 
-### 1. Get Menu Items
-**Endpoint:** `GET /api/menu`
+### Admin Endpoints
 
-**Description:** Retrieves all menu items.
+#### 1. Add a New Category
+- **Endpoint**: `POST /api/admin/category`
+- **Body**:
+  ```json
+  {
+    "name": "Vegetarian Pizzas",
+    "description": "Pizzas with only vegetarian toppings"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Category added successfully",
+    "category_id": "641c12345abc6789def01234"
+  }
+  ```
 
-**Response:**
-```json
-[
-    {
-        "id": 1,
-        "name": "Margherita",
-        "price": 9.99,
-        "category": "Vegetarian",
-        "description": "Classic Margherita pizza with fresh basil",
-        "image_url": "http://example.com/margherita.jpg"
-    }
-]
-```
+#### 2. Add a New Pizza
+- **Endpoint**: `POST /api/admin/pizza`
+- **Body**:
+  ```json
+  {
+    "name": "Margherita",
+    "category_id": "641c12345abc6789def01234",
+    "price": 299,
+    "image_url": "http://example.com/image.jpg"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Pizza added successfully",
+    "pizza_id": "641c98765zyx5432wvu10987"
+  }
+  ```
 
----
+#### 3. Update Order Status
+- **Endpoint**: `PUT /api/admin/order/{order_id}`
+- **Body**:
+  ```json
+  {
+    "status": "Completed"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Order status updated successfully"
+  }
+  ```
 
-### 2. Add Menu Item (Admin Only)
-**Endpoint:** `POST /api/menu`
-
-**Description:** Adds a new menu item.
-
-**Request Body:**
-```json
-{
-    "name": "BBQ Chicken",
-    "price": 12.99,
-    "category": "Non-Vegetarian",
-    "description": "BBQ Chicken pizza with onions and cheese",
-    "image_url": "http://example.com/bbqchicken.jpg"
-}
-```
-
-**Response:**
-```json
-{
-    "message": "Menu item added successfully!",
-    "item_id": 2
-}
-```
-
-**Error Handling:**
-- If `category` is missing, returns:
-```json
-{
-    "detail": "Category cannot be null"
-}
-```
-
----
-
-### 3. Place an Order
-**Endpoint:** `POST /api/orders`
-
-**Description:** Places a new order.
-
-**Request Body:**
-```json
-{
-    "customer_name": "John Doe",
-    "mobile": "9876543210",
-    "items": [
-        {"pizza_id": 1, "quantity": 2},
-        {"pizza_id": 2, "quantity": 1}
-    ]
-}
-```
-
-**Response:**
-```json
-{
-    "order_id": 5,
-    "message": "Order placed successfully!"
-}
-```
-
----
-
-### 4. Get Orders by Mobile Number
-**Endpoint:** `GET /api/orders?number=9876543210`
-
-**Description:** Fetches all orders associated with a given mobile number.
-
-**Response:**
-```json
-[
-    {
-        "order_id": 5,
-        "customer_name": "John Doe",
-        "mobile": "9876543210",
-        "items": [
-            {"pizza_name": "Margherita", "quantity": 2},
-            {"pizza_name": "BBQ Chicken", "quantity": 1}
+#### 4. View All Orders
+- **Endpoint**: `GET /api/admin/orders`
+- **Response**:
+  ```json
+  {
+    "orders": [
+      {
+        "order_id": "641f12345abc6789def01234",
+        "user_info": {
+          "name": "John Doe",
+          "mobile": "9876543210",
+          "address": "123 Pizza Street"
+        },
+        "pizzas": [
+          {
+            "pizzaId": "641c98765zyx5432wvu10987",
+            "name": "Margherita",
+            "quantity": 2,
+            "price": 299
+          }
         ],
-        "total_price": 32.97,
-        "status": "Preparing"
-    }
-]
+        "total_price": 598,
+        "status": "Pending",
+        "is_free": false
+      }
+    ]
+  }
+  ```
+
+---
+
+### User Endpoints
+
+#### 1. View Available Pizzas
+- **Endpoint**: `GET /api/user/pizzas`
+- **Response**:
+  ```json
+  {
+    "pizzas": [
+      {
+        "pizza_id": "641c98765zyx5432wvu10987",
+        "name": "Margherita",
+        "category_id": "641c12345abc6789def01234",
+        "price": 299,
+        "image_url": "http://example.com/image.jpg"
+      }
+    ]
+  }
+  ```
+
+#### 2. Place an Order
+- **Endpoint**: `POST /api/user/order`
+- **Body**:
+  ```json
+  {
+    "name": "John Doe",
+    "mobile": "9876543210",
+    "address": "123 Pizza Street",
+    "pizzas": [
+      {
+        "pizzaId": "641c98765zyx5432wvu10987",
+        "quantity": 2
+      }
+    ]
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "message": "Order placed successfully",
+    "order_id": "641f12345abc6789def01234"
+  }
+  ```
+
+---
+
+### Image Upload Endpoint
+
+#### 1. Upload an Image
+- **Endpoint**: `POST /api/upload`
+- **Body**: File (binary)
+- **Response**:
+  ```json
+  {
+    "message": "Image uploaded successfully",
+    "url": "http://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/image.jpg"
+  }
+  ```
+
+---
+
+## Sample Responses
+
+### Error Responses
+1. **Category Not Found**:
+   - **Status**: `404 Not Found`
+   - **Response**:
+     ```json
+     {
+       "detail": "Category not found"
+     }
+     ```
+
+2. **Invalid Input**:
+   - **Status**: `400 Bad Request`
+   - **Response**:
+     ```json
+     {
+       "detail": "At least one pizza must be ordered"
+     }
+     ```
+
+3. **Order Not Found**:
+   - **Status**: `404 Not Found`
+   - **Response**:
+     ```json
+     {
+       "detail": "Order not found or status update failed"
+     }
+     ```
+
+---
+
+Feel free to contribute or report any issues. Happy coding! 🚀
 ```
-
----
-
-## Database Schema
-### Menu Table
-| Column      | Type         | Constraints  |
-|------------|-------------|-------------|
-| id         | INT         | PRIMARY KEY |
-| name       | VARCHAR(100) | NOT NULL    |
-| price      | DECIMAL(10,2) | NOT NULL    |
-| category   | VARCHAR(50)  | NOT NULL    |
-| description | TEXT        | NULLABLE    |
-| image_url  | TEXT        | NULLABLE    |
-
-### Orders Table
-| Column        | Type         | Constraints  |
-|--------------|-------------|-------------|
-| id           | INT         | PRIMARY KEY |
-| customer_name | VARCHAR(100) | NOT NULL   |
-| mobile       | VARCHAR(15)  | NOT NULL   |
-| total_price  | DECIMAL(10,2) | NOT NULL   |
-| status       | VARCHAR(50)  | DEFAULT 'Preparing' |
-
----
-
-## Notes
-- The API does **not** require authentication.
-- Orders can contain multiple pizzas.
-- Menu items cannot be added without a category.
-- Orders are fetched using `?number=` query parameter.
-
----
-
-## Future Enhancements
-- Implement authentication for the admin panel.
-- Add payment gateway integration.
-- Improve order tracking and status updates.

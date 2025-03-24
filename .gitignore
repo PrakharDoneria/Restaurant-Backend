@@ -1,1 +1,45 @@
-/.env
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment variables
+.env
+
+# macOS files
+.DS_Store
+
+# Logs
+*.log
+
+# Virtual environment
+venv/
+env/
+
+# Cloudinary cache (if any)
+.cloudinary/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Database dumps or data files (if applicable)
+*.db
+*.sql
+*.sqlite
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Test cache
+.pytest_cache/
+
+# Uvicorn logs (if generated)
+*.log.*
+
+# Other
+*.tmp
+*.swp

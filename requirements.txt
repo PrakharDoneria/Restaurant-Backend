@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-sqlalchemy
-pymysql
+pymongo
+cloudinary
 python-dotenv
-cryptography
+python-multipart

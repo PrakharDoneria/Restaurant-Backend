@@ -34,3 +34,10 @@ def update_order_status(order_id: str, status: str):
 def get_all_orders():
     orders = Order.get_all()
     return {"orders": orders}
+
+# Get all category names and IDs
+@router.get("/api/admin/categories")
+def get_all_categories():
+    categories = Category.get_all()
+    category_list = [{"id": str(category["_id"]), "name": category["name"]} for category in categories]
+    return {"categories": category_list}

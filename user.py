@@ -9,6 +9,12 @@ def get_pizzas():
     pizzas = Pizza.get_all()
     if not pizzas:
         raise HTTPException(status_code=404, detail="No pizzas found")
+    
+    # Convert ObjectId to string for each pizza
+    for pizza in pizzas:
+        pizza["_id"] = str(pizza["_id"])
+        pizza["category_id"] = str(pizza["category_id"])
+    
     return {"pizzas": pizzas}
 
 # Place an order
@@ -24,8 +30,12 @@ def place_order(name: str, mobile: str, address: str, pizzas: list):
         pizza_info = Pizza.get_by_id(pizza["pizzaId"])
         if not pizza_info:
             raise HTTPException(status_code=404, detail=f"Pizza with ID {pizza['pizzaId']} not found")
+        
+        pizza_info["_id"] = str(pizza_info["_id"])  # Convert ObjectId to string
+        pizza_info["category_id"] = str(pizza_info["category_id"])  # Convert ObjectId to string
+        
         pizza_details.append({
-            "pizzaId": pizza["pizzaId"],
+            "pizzaId": pizza_info["_id"],
             "quantity": pizza["quantity"],
             "price": pizza_info["price"],
             "name": pizza_info["name"]
@@ -45,4 +55,4 @@ def place_order(name: str, mobile: str, address: str, pizzas: list):
     )
     order_id = order.save()
 
-    return {"message": "Order placed successfully", "order_id": order_id}
+    return {"message": "Order placed successfully", "order_id": str(order_id)}

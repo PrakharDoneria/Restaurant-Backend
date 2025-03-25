@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from models import Category, Pizza, Order
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -29,15 +30,32 @@ def update_order_status(order_id: str, status: str):
         return {"message": "Order status updated successfully"}
     raise HTTPException(status_code=404, detail="Order not found or status update failed")
 
-# View all orders
+# View all orders (with ObjectId fix)
 @router.get("/api/admin/orders")
 def get_all_orders():
-    orders = Order.get_all()
-    return {"orders": orders}
+    try:
+        orders = Order.get_all()
+        
+        # Convert ObjectId to string for serialization
+        formatted_orders = []
+        for order in orders:
+            order["_id"] = str(order["_id"])  # Convert ObjectId to string
+            if "pizzas" in order:  # Ensure pizzas list is properly formatted
+                for pizza in order["pizzas"]:
+                    if "pizza_id" in pizza:
+                        pizza["pizza_id"] = str(pizza["pizza_id"])
+            formatted_orders.append(order)
+
+        return {"orders": formatted_orders}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch orders: {str(e)}")
 
 # Get all category names and IDs
 @router.get("/api/admin/categories")
 def get_all_categories():
-    categories = Category.get_all()
-    category_list = [{"id": str(category["_id"]), "name": category["name"]} for category in categories]
-    return {"categories": category_list}
+    try:
+        categories = Category.get_all()
+        category_list = [{"id": str(category["_id"]), "name": category["name"]} for category in categories]
+        return {"categories": category_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch categories: {str(e)}")

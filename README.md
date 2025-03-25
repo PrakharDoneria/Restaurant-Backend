@@ -200,3 +200,27 @@ Content-Type: multipart/form-data
   "image_url": "https://example.com/uploads/image123.jpg"
 }
 ```
+
+# **Get Order Status API**
+
+## **Endpoint**  
+`GET /api/user/status?id=<order_id>`
+
+## **Request**  
+- **Method:** `GET`  
+- **Query Parameter:**  
+  - `id` (string, required) → Order ID  
+
+### **Example Request**  
+```http
+GET /api/admin/status?id=order123
+```
+
+## **Response**  
+### ✅ **Success (200 OK)**  
+```json
+{
+  "order_id": "order123",
+  "current_status": "preparing"
+}
+```
